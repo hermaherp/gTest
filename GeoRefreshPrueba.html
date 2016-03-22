@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+    <title>geo</title>
+ 
+	<script type="text/javascript" src="JS/jquery-2.2.1.js"></script>
+	
+	<script type="text/javascript">
+	var inicio=0;
+	var timeout=0;
+ 
+	function empezarDetener(elemento)
+	{
+		if(timeout==0)
+		{
+			// empezar el cronometro
+ 
+			elemento.value="Detener";
+ 
+			// Obtenemos el valor actual
+			inicio=vuelta=new Date().getTime();
+ 
+			// iniciamos el proceso
+			funcionando();
+			
+		}else{
+			// detemer el cronometro
+ 
+			elemento.value="Empezar";
+			clearTimeout(timeout);
+			timeout=0;
+		}
+	}
+ 
+	function funcionando()
+	{
+		// obteneos la fecha actual
+		var actual = new Date().getTime();
+ 
+		// obtenemos la diferencia entre la fecha actual y la de inicio
+		var diff=new Date(actual-inicio);
+ 
+		// mostramos la diferencia entre la fecha actual y la inicial
+		var result=LeadingZero(diff.getUTCHours())+":"+LeadingZero(diff.getUTCMinutes())+":"+LeadingZero(diff.getUTCSeconds());
+		document.getElementById('crono').innerHTML = result;
+		obtener_localizacion();
+ 
+		// Indicamos que se ejecute esta función nuevamente dentro de 1 segundo
+		timeout=setTimeout("funcionando()",98);
+	}
+ 
+	/* Funcion que pone un 0 delante de un valor si es necesario */
+	function LeadingZero(Time) {
+		return (Time < 10) ? "0" + Time : + Time;
+	}
+	
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function obtener_localizacion() {
+	if (navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition(coordenadas);
+		}else{
+		alert('Tu navegador no soporta la API de geolocalizacion');
+		}
+	}
+	
+	var latitud;
+	var longitud;
+	
+	function coordenadas(position) {
+		latitud = position.coords.latitude;
+		longitud = position.coords.longitude;
+		
+		var mapa = document.getElementById("mapa");
+		mapaCad = "http://maps.google.com/maps/api/staticmap?center=" + latitud + "," + longitud + "&zoom=15&size=400x400&markers=color:green|label:A|" + latitud + "," + longitud + "&sensor=false";
+		
+		mapa.src = mapaCad;
+		
+		document.getElementById("latitud").value=latitud;
+		document.getElementById("longitud").value=longitud;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	var times=0;
+	var c=0;
+	
+$(document).ready(function(){
+	$('#empezar').click( function repeat() {
+		 var request = $.ajax({
+			url: "gloc.php",
+			type: "POST",
+			data: {lati : latitud, longi: longitud},
+			});
+
+		request.done(function(msg) {
+			$("#log").html( msg );
+			});
+
+		request.fail(function(jqXHR, textStatus) {
+			alert( "Request failed: " + textStatus );
+			});
+		
+		$('#a1').val("blob"+c);
+		
+		times=setTimeout(repeat, 98);
+		$('#a2').val("alas"+c);
+		c++;
+		
+	});
+});
+
+
+
+
+
+	</script>
+ 
+	<style>
+	.crono_wrapper {text-align:center;width:200px;}
+	</style>
+</head>
+ 
+<body>
+<?php
+include($_SERVER['DOCUMENT_ROOT']."/inc/headerCode.inc.php");
+?>
+
+<form id="latlong">
+	latitud:<input type="text" id="latitud" value="">
+	longitud:<input type="text" id="longitud" value="">
+</form>
+
+<form id="jqtest">
+	gagag<input type="text" id="a1" value="">
+	bloblob<input type="text" id="a2" value="">
+</form>
+
+<h1>Simple Cronometro en javascript</h1>
+ 
+<div class="crono_wrapper">
+	<h2 id='crono'>00:00:00</h2>
+	<input type="button" id="empezar" value="Empezar" onclick="empezarDetener(this);">
+</div>
+ 
+ <p><img id="mapa" src=""></p>
+ 
+<p>Puedes ver el código fuente en <a href="http://lwp-l.com/s2774">http://lwp-l.com/s2774</a></p>
+ 
+<?php
+include($_SERVER['DOCUMENT_ROOT']."/inc/footerCode.inc.php");
+?>
+ 
+</body>
+</html>
