@@ -2,13 +2,14 @@
 <html lang="es">
 <head>
 	<meta charset="utf-8">
-    <title>geo</title>
+    <title>geoloc</title>
  
 	<script type="text/javascript" src="JS/jquery-2.2.1.js"></script>
 	
 	<script type="text/javascript">
 	var inicio=0;
 	var timeout=0;
+	var vLat, vLon;
  
 	function empezarDetener(elemento)
 	{
@@ -88,40 +89,19 @@
 	
 $(document).ready(function(){
 	$('#empezar').click( function repeat() {
-	
-		 //guarda la estructura del archivo JSON
-		 var coords={
-				"Jlati": latitud,
-				"Jlongi": longitud
-				};
-				
-		//envia solicitudes asincronas de escrtura con los parametros especificados
-		 var request = $.ajax({
-		 
-			//define tipo de envio de datos (POST, GET)
-			type: "POST",
-			
-			//define o forza el tipo de datos
-			dataType : 'text',
-			
-			//indica sincronizacion
-			async: false,
-			
-			//define el script del servidor con el que se procesaran los datos
-			url: 'saveJSON.php',
-			
-			//define los datos a enviar, la estructura debe ser siempre data: {data:##datos##}
-			data: { data: JSON.stringify(coords) },
-			
-			//definen objetos de estado de funcion (enviado o fallo)
-			success: function (){ $("#status").val("SENDING"); },
-			failure: function (){ $("#status").val("ERROR"); }
+		
+		 $.getJSON("guardar.json", function(data){
+			 console.log(data);
+			 
+			 
+			 vLat=parseFloat(data.Jlati);
+			 vLon=parseFloat(data.Jlongi);
+			 
+			 $('#a1').val(''+vLat);
+			 $("#a2").val(''+vLon);
 			});
 		
-		$('#a1').val("blob"+c);
-		
-		times=setTimeout(repeat, 280);
-		$('#a2').val("alas"+c);
+		times=setTimeout(repeat, 300);
 		c++;
 		});
 });
@@ -134,8 +114,6 @@ $(document).ready(function(){
 </head>
  
 <body>
-
-<input type="text" id="status" value="">
 
 <form id="latlong">
 	latitud:<input type="text" id="latitud" value="">
